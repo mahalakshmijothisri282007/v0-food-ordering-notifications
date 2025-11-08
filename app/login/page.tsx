@@ -8,6 +8,7 @@ import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,6 +37,22 @@ export default function LoginPage() {
         <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
+      <div className="absolute inset-0 flex flex-col items-center justify-start pt-8 pointer-events-none">
+        <div className="relative z-5">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-qfbNGR42QRfm1ysp7ggkXlB1ROmSM3.png"
+            alt="Madras Engineering College Logo"
+            width={120}
+            height={120}
+            className="drop-shadow-2xl"
+          />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mt-6 drop-shadow-lg text-center">
+          Madras Engineering College
+        </h1>
+        <p className="text-purple-100 text-lg mt-2 text-center drop-shadow-md">Food Ordering System</p>
+      </div>
+
       <div className="absolute top-8 left-8 text-center md:text-left">
         <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent mb-2">
           MEC Food Ordering System
@@ -43,7 +60,7 @@ export default function LoginPage() {
         <p className="text-purple-200 text-sm md:text-base">Delicious Food, Fast Delivery</p>
       </div>
 
-      <Card className="w-full max-w-md bg-white/10 border-purple-500/30 backdrop-blur-xl relative z-10">
+      <Card className="w-full max-w-md bg-white/10 border-purple-500/30 backdrop-blur-xl relative z-10 mt-40">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             MEC Food Order

@@ -40,10 +40,38 @@ export default function UserDashboard() {
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 relative">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 relative overflow-hidden">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Animated blobs */}
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
         <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+
+        {/* Elegant MEC watermark text */}
+        <div className="absolute top-32 right-12 opacity-5">
+          <div className="text-9xl font-bold text-white animate-float">MEC</div>
+        </div>
+
+        <div className="absolute top-20 left-12 opacity-8">
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-qfbNGR42QRfm1ysp7ggkXlB1ROmSM3.png"
+            alt="MEC Logo"
+            className="w-32 h-32 drop-shadow-lg"
+          />
+        </div>
+
+        {/* Decorative circles */}
+        <div className="absolute bottom-40 left-20 w-64 h-64 border-2 border-purple-400/10 rounded-full"></div>
+        <div className="absolute top-1/2 right-1/4 w-48 h-48 border-2 border-pink-400/10 rounded-full"></div>
+        <div className="absolute -bottom-20 right-40 w-80 h-80 border-2 border-indigo-400/10 rounded-full"></div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(90deg, rgba(168, 85, 247, 0.5) 1px, transparent 1px), linear-gradient(rgba(168, 85, 247, 0.5) 1px, transparent 1px)`,
+            backgroundSize: "50px 50px",
+          }}
+        ></div>
       </div>
 
       {/* Header */}
@@ -100,7 +128,10 @@ export default function UserDashboard() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <button className="w-full text-left px-3 py-2 text-purple-200 hover:bg-purple-700/40 rounded transition text-sm">
+                    <button
+                      onClick={() => router.push("/profile")}
+                      className="w-full text-left px-3 py-2 text-purple-200 hover:bg-purple-700/40 rounded transition text-sm"
+                    >
                       View Profile
                     </button>
                     <button className="w-full text-left px-3 py-2 text-purple-200 hover:bg-purple-700/40 rounded transition text-sm">
