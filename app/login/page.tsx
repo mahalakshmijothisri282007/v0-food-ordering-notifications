@@ -4,124 +4,107 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useAuth } from "@/context/auth-context"
-import type { UserRole } from "@/context/auth-context"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [selectedRole, setSelectedRole] = useState<UserRole>("user")
-  const [error, setError] = useState("")
-  const { login, isLoading } = useAuth()
-  const router = useRouter()
+  const [selectedRole, setSelectedRole] = useState<"user" | "chef" | "manager">("user")
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    login(selectedRole, email)
+    router.push("/dashboard")
+  }
 
-    if (!email || !password) {
-      setError("Please fill in all fields")
-      return
-    }
-
-    try {
-      await login(email, password, selectedRole)
-      router.push("/dashboard")
-    } catch (err) {
-      setError("Login failed. Please try again.")
-    }
+  const demoCredentials: Record<string, string> = {
+    user: "user@mec.college",
+    chef: "chef@mec.college",
+    manager: "manager@mec.college",
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-card border border-border rounded-xl p-8 shadow-2xl backdrop-blur-sm">
-          <div className="mb-2 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg mb-4">
-              <span className="text-white font-bold text-lg">🍽️</span>
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-center text-foreground mb-1">MEC Canteen</h1>
-          <p className="text-center text-muted-foreground mb-8 text-sm">Food Ordering System</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
+      <div className="absolute top-8 left-8 text-center md:text-left">
+        <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent mb-2">
+          MEC Food Ordering System
+        </h2>
+        <p className="text-purple-200 text-sm md:text-base">Delicious Food, Fast Delivery</p>
+      </div>
+
+      <Card className="w-full max-w-md bg-white/10 border-purple-500/30 backdrop-blur-xl relative z-10">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            MEC Food Order
+          </CardTitle>
+          <CardDescription className="text-purple-200">Login to your account</CardDescription>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Role Selection */}
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-foreground">Select Role</label>
+              <label className="text-sm font-medium text-purple-200">Select Role</label>
               <div className="grid grid-cols-3 gap-2">
-                {(["user", "chef", "manager"] as UserRole[]).map((role) => (
+                {(["user", "chef", "manager"] as const).map((role) => (
                   <button
                     key={role}
                     type="button"
                     onClick={() => setSelectedRole(role)}
-                    className={`py-2 px-3 rounded-lg font-medium text-sm transition-all capitalize ${
+                    className={`py-2 px-3 rounded-lg font-medium transition ${
                       selectedRole === role
-                        ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-primary-foreground shadow-lg scale-105"
-                        : "bg-secondary/50 text-secondary-foreground hover:bg-secondary border border-border"
+                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                        : "bg-purple-700/40 text-purple-200 hover:bg-purple-600/40"
                     }`}
                   >
-                    {role}
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-semibold text-foreground">
-                Email
-              </label>
+              <label className="text-sm font-medium text-purple-200">Email</label>
               <Input
-                id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder={demoCredentials[selectedRole]}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-background/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="bg-purple-700/40 border-purple-500/30 text-white placeholder:text-purple-300"
               />
             </div>
 
-            {/* Password */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-semibold text-foreground">
-                Password
-              </label>
+              <label className="text-sm font-medium text-purple-200">Password</label>
               <Input
-                id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-background/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="bg-purple-700/40 border-purple-500/30 text-white placeholder:text-purple-300"
               />
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold"
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
             >
-              {isLoading ? "Logging in..." : "Login"}
+              Login
             </Button>
-          </form>
 
-          <div className="mt-6 p-4 bg-secondary/30 rounded-lg text-xs text-muted-foreground border border-secondary/50">
-            <p className="font-semibold mb-2 text-foreground">Demo Credentials:</p>
-            <p>Email: demo@mec.edu</p>
-            <p>Password: demo123</p>
-          </div>
-        </div>
-      </div>
+            <div className="text-center text-sm text-purple-300">Demo: {demoCredentials[selectedRole]} / password</div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

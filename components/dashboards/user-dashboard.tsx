@@ -2,141 +2,163 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ShoppingCart, Clock, CheckCircle2, AlertCircle, Sparkles } from "lucide-react"
-import { MenuItemCard } from "@/components/menu-item-card"
+import { useAuth } from "@/context/auth-context"
 import { useCart } from "@/context/cart-context"
+import { useNotifications } from "@/context/notification-context"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Bell, LogOut, ShoppingCart } from "lucide-react"
 
 const MENU_ITEMS = [
-  {
-    id: 1,
-    name: "Biryani",
-    description: "Aromatic rice with spiced meat",
-    price: 120,
-    category: "Rice",
-    image: "/flavorful-biryani.png",
-  },
-  {
-    id: 2,
-    name: "Samosas",
-    description: "Crispy pastry with vegetable filling",
-    price: 30,
-    category: "Snacks",
-    image: "/crispy-samosas.png",
-  },
-  {
-    id: 3,
-    name: "Dosa",
-    description: "Crispy crepe with potato filling",
-    price: 60,
-    category: "South Indian",
-    image: "/crispy-dosa.png",
-  },
-  {
-    id: 4,
-    name: "Butter Chicken",
-    description: "Tender chicken in creamy tomato sauce",
-    price: 150,
-    category: "Curry",
-    image: "/butter-chicken.jpg",
-  },
-  {
-    id: 5,
-    name: "Naan",
-    description: "Fluffy Indian bread",
-    price: 40,
-    category: "Bread",
-    image: "/naan-bread.png",
-  },
-  {
-    id: 6,
-    name: "Chai",
-    description: "Traditional Indian tea",
-    price: 20,
-    category: "Beverages",
-    image: "/chai.jpg",
-  },
+  { id: "1", name: "Chicken Biryani", price: 200, image: "/flavorful-biryani.png" },
+  { id: "2", name: "Samosa", price: 30, image: "/crispy-golden-samosas.png" },
+  { id: "3", name: "Butter Chicken", price: 250, image: "/butter-chicken.png" },
+  { id: "4", name: "Dosa", price: 80, image: "/crispy-dosa.png" },
+  { id: "5", name: "Garlic Naan", price: 50, image: "/naan-bread.png" },
+  { id: "6", name: "Paneer Tikka", price: 180, image: "/paneer-tikka.png" },
+  { id: "7", name: "Masala Dosa", price: 100, image: "/masala-dosa.png" },
+  { id: "8", name: "Tandoori Chicken", price: 220, image: "/tandoori-chicken.png" },
+  { id: "9", name: "Chole Bhature", price: 120, image: "/chole-bhature.jpg" },
+  { id: "10", name: "Idli", price: 40, image: "/fluffy-idli.png" },
+  { id: "11", name: "Vada Pav", size: 60, image: "/vada-pav.png" },
+  { id: "12", name: "Pulao", price: 150, image: "/pulao.jpg" },
 ]
 
-export function UserDashboard() {
-  const [orders, setOrders] = useState<any[]>([])
+export default function UserDashboard() {
   const router = useRouter()
-  const { cartItems, total } = useCart()
+  const { user, logout } = useAuth()
+  const { cartItems, addToCart, totalPrice } = useCart()
+  const { notifications } = useNotifications()
+  const [showCart, setShowCart] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    router.push("/login")
+  }
+
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-200/50 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Sparkles className="w-6 h-6 text-purple-600" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            MEC Canteen
-          </h1>
-        </div>
-        <p className="text-muted-foreground">Welcome! Order your favorite meals</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 relative">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
       </div>
 
-      {/* Order Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard
-          icon={ShoppingCart}
-          label="Total Orders"
-          value={orders.length.toString()}
-          color="from-purple-600 to-indigo-600"
-        />
-        <StatCard icon={Clock} label="Pending" value="2" color="from-orange-500 to-red-500" />
-        <StatCard icon={CheckCircle2} label="Completed" value="5" color="from-green-500 to-emerald-500" />
-        <StatCard icon={AlertCircle} label="Ready for Pickup" value="1" color="from-blue-500 to-cyan-500" />
-      </div>
-
-      {/* Menu Section */}
-      <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-          <span className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full"></span>
-          Order Food
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MENU_ITEMS.map((item) => (
-            <MenuItemCard key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
-
-      {/* Cart Summary Section */}
-      {cartItems.length > 0 && (
-        <div className="sticky bottom-6 right-6">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-primary-foreground rounded-xl p-6 shadow-2xl max-w-sm border border-purple-400/50">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                <span className="font-semibold">Cart Items: {cartItems.length}</span>
-              </div>
-              <span className="text-3xl font-bold">₹{total.toFixed(2)}</span>
-            </div>
-            <Button
-              onClick={() => router.push("/checkout")}
-              className="w-full bg-white text-purple-600 hover:bg-gray-100 font-semibold"
+      {/* Header */}
+      <div className="bg-purple-950/50 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              🍽️ MEC Food Ordering System
+            </h1>
+            <p className="text-xs text-purple-300">Delicious food at your doorstep</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowCart(!showCart)}
+              className="relative p-2 rounded-lg bg-purple-700/40 hover:bg-purple-600/40 text-purple-200 transition"
             >
-              Go to Checkout
+              <ShoppingCart size={24} />
+              {cartItems.length > 0 && (
+                <span className="absolute top-0 right-0 w-6 h-6 bg-pink-500 rounded-full text-white text-xs flex items-center justify-center">
+                  {cartItems.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => router.push("/orders")}
+              className="relative p-2 rounded-lg bg-purple-700/40 hover:bg-purple-600/40 text-purple-200 transition"
+            >
+              <Bell size={24} />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 w-6 h-6 bg-red-500 rounded-full text-white text-xs flex items-center justify-center animate-bounce">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+            <Button onClick={handleLogout} variant="outline" size="sm">
+              <LogOut size={16} className="mr-2" />
+              Logout
             </Button>
           </div>
         </div>
-      )}
-    </div>
-  )
-}
-
-function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
-  return (
-    <div className="bg-card border border-border rounded-xl p-6 flex items-start gap-4 hover:shadow-lg transition-shadow">
-      <div className={`p-3 bg-gradient-to-br ${color} rounded-lg`}>
-        <Icon className="w-6 h-6 text-white" />
       </div>
-      <div>
-        <p className="text-sm text-muted-foreground font-medium">{label}</p>
-        <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-          {value}
-        </p>
+
+      <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
+        <div className="text-purple-200 mb-8">
+          <p className="text-lg">
+            Welcome, <span className="font-semibold text-purple-300">{user?.email}</span>
+          </p>
+        </div>
+
+        <Card className="bg-gradient-to-r from-purple-800/40 to-indigo-800/40 border-purple-500/30 mb-8 backdrop-blur">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-1">Add Your Favorite Meals</h3>
+                <p className="text-purple-200">Explore our delicious menu and add items to your cart below</p>
+              </div>
+              <div className="text-4xl">🍴</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {showCart && cartItems.length > 0 ? (
+          <Card className="bg-purple-900/40 border-purple-500/30 mb-8">
+            <CardHeader>
+              <CardTitle className="text-white">Your Cart</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="flex justify-between text-purple-200">
+                    <span>
+                      {item.name} x {item.quantity}
+                    </span>
+                    <span>₹{item.price * item.quantity}</span>
+                  </div>
+                ))}
+                <div className="border-t border-purple-500/20 pt-4 flex justify-between text-purple-300 font-semibold">
+                  <span>Total:</span>
+                  <span>₹{totalPrice}</span>
+                </div>
+                <Button
+                  onClick={() => router.push("/checkout")}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                >
+                  Proceed to Checkout
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {/* Menu Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {MENU_ITEMS.map((item) => (
+            <Card key={item.id} className="bg-purple-900/40 border-purple-500/30 hover:border-purple-400/60 transition">
+              <div className="relative h-40 bg-gradient-to-br from-purple-700 to-indigo-700 rounded-t-lg overflow-hidden">
+                <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-full object-cover" />
+              </div>
+              <CardContent className="pt-4">
+                <h3 className="font-semibold text-white mb-2">{item.name}</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-pink-400 font-bold">₹{item.price}</span>
+                  <Button
+                    onClick={() =>
+                      addToCart({ id: item.id, name: item.name, price: item.price, quantity: 1, image: item.image })
+                    }
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   )

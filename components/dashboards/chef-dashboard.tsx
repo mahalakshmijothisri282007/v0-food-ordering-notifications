@@ -1,75 +1,101 @@
 "use client"
 
-import { Clock, AlertCircle, CheckCircle2 } from "lucide-react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/auth-context"
+import { useNotifications } from "@/context/notification-context"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { LogOut, ChefHat } from "lucide-react"
 
-const ORDERS = [
-  { id: "ORD-001", items: "Biryani x2", status: "preparing", time: "5 mins" },
-  { id: "ORD-002", items: "Dosa x1, Chai x2", status: "ready", time: "Ready" },
-  { id: "ORD-003", items: "Butter Chicken x1", status: "pending", time: "10 mins" },
+const SAMPLE_ORDERS = [
+  { id: "#001", items: "Biryani x2, Naan x1", status: "pending", time: "5 mins" },
+  { id: "#002", items: "Butter Chicken x1, Dosa x2", status: "preparing", time: "15 mins" },
+  { id: "#003", items: "Samosa x3", status: "preparing", time: "8 mins" },
 ]
 
-export function ChefDashboard() {
-  return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard icon={AlertCircle} label="Pending Orders" value="3" color="orange" />
-        <StatCard icon={Clock} label="Preparing" value="2" color="blue" />
-        <StatCard icon={CheckCircle2} label="Ready" value="1" color="green" />
-      </div>
+export default function ChefDashboard() {
+  const router = useRouter()
+  const { user, logout } = useAuth()
+  const { addNotification } = useNotifications()
+  const [orders, setOrders] = useState(SAMPLE_ORDERS)
 
-      <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Order Queue</h2>
-        <div className="space-y-4">
-          {ORDERS.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
+  const handleLogout = () => {
+    logout()
+    router.push("/login")
+  }
+
+  const markReady = (orderId: string) => {
+    setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status: "ready" } : order)))
+    addNotification({
+      type: "order_ready",
+      title: "Order Ready!",
+      message: `Order ${orderId} is ready for pickup`,
+      orderNumber: orderId,
+    })
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      {/* Header */}
+      <div className="bg-purple-950/50 backdrop-blur-md border-b border-purple-500/20">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold flex items-center gap-2 text-purple-400">
+            <ChefHat size={28} />
+            Chef Dashboard
+          </h1>
+          <Button onClick={handleLogout} variant="outline">
+            <LogOut size={16} className="mr-2" />
+            Logout
+          </Button>
         </div>
       </div>
-    </div>
-  )
-}
 
-function OrderCard({ order }: { order: (typeof ORDERS)[0] }) {
-  const statusColors = {
-    pending: "bg-yellow-100 text-yellow-800",
-    preparing: "bg-blue-100 text-blue-800",
-    ready: "bg-green-100 text-green-800",
-  }
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-purple-200 mb-8">
+          <p className="text-lg">
+            Logged in as: <span className="font-semibold text-purple-300">{user?.email}</span>
+          </p>
+        </div>
 
-  return (
-    <div className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-      <div className="flex-1">
-        <p className="font-semibold text-foreground">{order.id}</p>
-        <p className="text-sm text-muted-foreground">{order.items}</p>
-      </div>
-      <div className="flex items-center gap-4">
-        <span
-          className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${statusColors[order.status as keyof typeof statusColors]}`}
-        >
-          {order.status}
-        </span>
-        <Button size="sm">{order.status === "ready" ? "Mark Delivered" : "Start Cooking"}</Button>
-      </div>
-    </div>
-  )
-}
-
-function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
-  const colorMap = {
-    orange: "bg-orange-100 text-orange-600",
-    blue: "bg-blue-100 text-blue-600",
-    green: "bg-green-100 text-green-600",
-  }
-
-  return (
-    <div className="bg-card border border-border rounded-lg p-6 flex items-start gap-4">
-      <div className={`p-3 rounded-lg ${colorMap[color as keyof typeof colorMap]}`}>
-        <Icon className="w-6 h-6" />
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-2xl font-bold text-foreground">{value}</p>
+        <div className="grid gap-6">
+          {orders.map((order) => (
+            <Card key={order.id} className="bg-purple-900/40 border-purple-500/30">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-white">{order.id}</CardTitle>
+                    <CardDescription className="text-purple-300">{order.items}</CardDescription>
+                  </div>
+                  <div
+                    className={`px-4 py-2 rounded-full font-semibold ${
+                      order.status === "pending"
+                        ? "bg-yellow-500/20 text-yellow-300"
+                        : order.status === "preparing"
+                          ? "bg-blue-500/20 text-blue-300"
+                          : "bg-green-500/20 text-green-300"
+                    }`}
+                  >
+                    {order.status.toUpperCase()}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-300">Time: {order.time}</span>
+                  {order.status !== "ready" && (
+                    <Button
+                      onClick={() => markReady(order.id)}
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                    >
+                      Mark Ready
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   )
