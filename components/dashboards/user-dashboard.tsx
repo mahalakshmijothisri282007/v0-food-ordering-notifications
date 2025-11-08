@@ -7,7 +7,7 @@ import { useCart } from "@/context/cart-context"
 import { useNotifications } from "@/context/notification-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bell, LogOut, ShoppingCart } from "lucide-react"
+import { Bell, LogOut, ShoppingCart, User, Mail } from "lucide-react"
 
 const MENU_ITEMS = [
   { id: "1", name: "Chicken Biryani", price: 200, image: "/flavorful-biryani.png" },
@@ -30,6 +30,7 @@ export default function UserDashboard() {
   const { cartItems, addToCart, totalPrice } = useCart()
   const { notifications } = useNotifications()
   const [showCart, setShowCart] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -77,6 +78,47 @@ export default function UserDashboard() {
                 </span>
               )}
             </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                className="p-2 rounded-lg bg-purple-700/40 hover:bg-purple-600/40 text-purple-200 transition"
+              >
+                <User size={24} />
+              </button>
+              {showProfile && (
+                <div className="absolute right-0 mt-2 w-48 bg-purple-900/95 border border-purple-500/30 rounded-lg shadow-lg p-4 backdrop-blur">
+                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-purple-500/20">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                      <User size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">Profile</p>
+                      <p className="text-xs text-purple-300 flex items-center gap-1">
+                        <Mail size={12} />
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <button className="w-full text-left px-3 py-2 text-purple-200 hover:bg-purple-700/40 rounded transition text-sm">
+                      View Profile
+                    </button>
+                    <button className="w-full text-left px-3 py-2 text-purple-200 hover:bg-purple-700/40 rounded transition text-sm">
+                      My Orders
+                    </button>
+                    <button className="w-full text-left px-3 py-2 text-purple-200 hover:bg-purple-700/40 rounded transition text-sm">
+                      Settings
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-3 py-2 text-red-400 hover:bg-purple-700/40 rounded transition text-sm border-t border-purple-500/20 mt-2 pt-2"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <Button onClick={handleLogout} variant="outline" size="sm">
               <LogOut size={16} className="mr-2" />
               Logout
